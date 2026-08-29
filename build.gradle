@@ -55,6 +55,6 @@ tasks.named('jar') {
     enabled = false
 }
 
-tasks.named('bootJar') {
-    archiveFileName = 'Flowterserver-0.0.1-SNAPSHOT-plain.jar'
+tasks.named('jar') {
+    enabled = false
 }
