@@ -12,12 +12,9 @@ class SecurityConfig {
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .formLogin { it.disable() }
-            .httpBasic { it.disable() }
-            .authorizeHttpRequests {
-                it
-                    .requestMatchers("/api/health").permitAll()
-                    .anyRequest().authenticated()
+            .authorizeHttpRequests { auth ->
+                auth
+                    .anyRequest().permitAll()
             }
 
         return http.build()
