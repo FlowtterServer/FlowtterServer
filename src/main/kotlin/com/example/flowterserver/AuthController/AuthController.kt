@@ -1,0 +1,36 @@
+package com.example.flowterserver
+
+import com.example.flowterserver.service.AuthService
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+data class RegisterRequest(
+    val username: String,
+    val email: String,
+    val password: String
+)
+
+@RestController
+@RequestMapping("/api/auth")
+class AuthController(
+    private val authService: AuthService
+) {
+
+    @PostMapping("/register")
+    fun register(@RequestBody request: RegisterRequest): Map<String, Any?> {
+
+        val user = authService.register(
+            username = request.username,
+            email = request.email,
+            password = request.password
+        )
+
+        return mapOf(
+            "id" to user.id,
+            "username" to user.username,
+            "email" to user.email
+        )
+    }
+}
