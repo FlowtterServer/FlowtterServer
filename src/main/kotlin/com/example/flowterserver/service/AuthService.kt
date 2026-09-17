@@ -30,4 +30,16 @@ class AuthService(
 
         return userRepository.save(user)
     }
+
+    fun login(username: String, password: String): User {
+
+        val user = userRepository.findByUsername(username)
+            ?: throw IllegalArgumentException("Invalid username or password")
+
+        if (!passwordEncoder.matches(password, user.password)) {
+            throw IllegalArgumentException("Invalid username or password")
+        }
+
+        return user
+    }
 }
