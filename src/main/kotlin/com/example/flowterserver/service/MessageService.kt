@@ -29,14 +29,13 @@ class MessageService(
     }
 
     fun getConversation(
-        senderId: Long,
-        receiverId: Long
+        user1: Long,
+        user2: Long
     ): List<Message> {
 
-        return messageRepository
-            .findBySenderIdAndReceiverIdOrderByCreatedAtAsc(
-                senderId,
-                receiverId
-            )
+        return messageRepository.findConversation(
+            user1 = user1,
+            user2 = user2
+        )
     }
 }

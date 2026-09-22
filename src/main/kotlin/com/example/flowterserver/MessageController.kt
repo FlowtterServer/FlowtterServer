@@ -40,8 +40,8 @@ class MessageController(
     ): List<Message> {
 
         return messageService.getConversation(
-            senderId = senderId,
-            receiverId = receiverId
+            user1 = senderId,
+            user2 = receiverId
         )
     }
 }
