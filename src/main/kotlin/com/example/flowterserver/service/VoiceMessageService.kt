@@ -40,9 +40,29 @@ class VoiceMessageService(
         user1: Long,
         user2: Long
     ): List<VoiceMessage> {
+
         return voiceMessageRepository.findConversation(
             user1 = user1,
             user2 = user2
+        )
+    }
+
+    fun getPlaybackUrl(id: Long): Map<String, Any?> {
+
+        val voiceMessage = voiceMessageRepository.findById(id)
+            .orElseThrow {
+                IllegalArgumentException("Voice message not found")
+            }
+
+        val signedUrl =
+            supabaseStorageService.createVoiceMessageSignedUrl(
+                voiceMessage.fileName
+            )
+
+        return mapOf(
+            "id" to voiceMessage.id,
+            "url" to signedUrl,
+            "expiresIn" to 3600
         )
     }
 }

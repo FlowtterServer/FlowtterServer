@@ -4,6 +4,7 @@ import com.example.flowterserver.model.VoiceMessage
 import com.example.flowterserver.service.VoiceMessageService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -54,5 +55,13 @@ class VoiceMessageController(
             user1 = senderId,
             user2 = receiverId
         )
+    }
+
+    @GetMapping("/{id}/play")
+    fun getPlaybackUrl(
+        @PathVariable id: Long
+    ): Map<String, Any?> {
+
+        return voiceMessageService.getPlaybackUrl(id)
     }
 }
