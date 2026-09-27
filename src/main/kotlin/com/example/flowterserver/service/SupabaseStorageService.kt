@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.UUID
 
@@ -30,6 +31,10 @@ class SupabaseStorageService {
         audioBytes: ByteArray,
         contentType: String
     ): String {
+
+        if (audioBytes.isEmpty()) {
+            throw IllegalArgumentException("Audio file is empty")
+        }
 
         val fileName = "${UUID.randomUUID()}.m4a"
 
@@ -76,20 +81,30 @@ class SupabaseStorageService {
 
         val request = HttpEntity(body, headers)
 
-        val response = restTemplate.postForObject(
-            url,
-            request,
-            SupabaseSignedUrlResponse::class.java
-        ) ?: throw IllegalStateException(
-            "Supabase did not return a signed URL"
-        )
+        try {
+            val response = restTemplate.postForObject(
+                url,
+                request,
+                SupabaseSignedUrlResponse::class.java
+            ) ?: throw IllegalStateException(
+                "Supabase did not return a signed URL"
+            )
 
-        val signedPath = response.signedURL
+            val signedPath = response.signedURL
 
-        return if (signedPath.startsWith("http")) {
-            signedPath
-        } else {
-            "$supabaseUrl/storage/v1$signedPath"
+            return if (signedPath.startsWith("http")) {
+                signedPath
+            } else {
+                "$supabaseUrl/storage/v1$signedPath"
+            }
+
+        } catch (e: HttpStatusCodeException) {
+            throw IllegalStateException(
+                "Supabase signed URL error: " +
+                        "HTTP ${e.statusCode.value()}, " +
+                        "response: ${e.responseBodyAsString}",
+                e
+            )
         }
     }
 }
