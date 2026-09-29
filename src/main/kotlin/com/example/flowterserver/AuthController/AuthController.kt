@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController
 data class RegisterRequest(
     val username: String,
     val email: String,
-    val password: String
+    val password: String,
+    val birthDate: String
 )
 
 data class LoginRequest(
@@ -31,7 +32,8 @@ class AuthController(
         val user = authService.register(
             username = request.username,
             email = request.email,
-            password = request.password
+            password = request.password,
+            birthDate = request.birthDate
         )
 
         return mapOf(

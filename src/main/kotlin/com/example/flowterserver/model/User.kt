@@ -22,5 +22,8 @@ class User(
     var email: String = "",
 
     @Column(nullable = false)
-    var password: String = ""
+    var password: String = "",
+
+    @Column(name = "birth_date")
+    var birthDate: java.time.LocalDate? = null
 )

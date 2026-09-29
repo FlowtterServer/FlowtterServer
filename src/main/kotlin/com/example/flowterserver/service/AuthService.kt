@@ -4,6 +4,7 @@ import com.example.flowterserver.model.User
 import com.example.flowterserver.repository.UserRepository
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class AuthService(
@@ -12,7 +13,12 @@ class AuthService(
 
     private val passwordEncoder = BCryptPasswordEncoder()
 
-    fun register(username: String, email: String, password: String): User {
+    fun register(
+        username: String,
+        email: String,
+        password: String,
+        birthDate: String
+    ): User {
 
         if (userRepository.findByUsername(username) != null) {
             throw IllegalArgumentException("Username already exists")
@@ -25,7 +31,8 @@ class AuthService(
         val user = User(
             username = username,
             email = email,
-            password = requireNotNull(passwordEncoder.encode(password))
+            password = requireNotNull(passwordEncoder.encode(password)),
+            birthDate = LocalDate.parse(birthDate)
         )
 
         return userRepository.save(user)
