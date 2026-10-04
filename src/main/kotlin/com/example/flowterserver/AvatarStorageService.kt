@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
@@ -16,6 +17,7 @@ class AvatarStorageService(
 
     @Value("\${supabase.key}")
     private val supabaseKey: String
+
 ) {
 
     private val restTemplate = RestTemplate()
@@ -27,7 +29,7 @@ class AvatarStorageService(
 
         val fileName = "$userId-${System.currentTimeMillis()}.jpg"
 
-        val url =
+        val uploadUrl =
             "$supabaseUrl/storage/v1/object/avatars/$fileName"
 
         val headers = HttpHeaders()
@@ -42,17 +44,15 @@ class AvatarStorageService(
             supabaseKey
         )
 
-        headers.contentType =
-            org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
+        headers.contentType = MediaType.APPLICATION_OCTET_STREAM
 
-        val entity =
-            HttpEntity(
-                file.bytes,
-                headers
-            )
+        val entity = HttpEntity(
+            file.bytes,
+            headers
+        )
 
         restTemplate.exchange(
-            url,
+            uploadUrl,
             HttpMethod.POST,
             entity,
             String::class.java
