@@ -1,5 +1,6 @@
 package com.example.flowterserver.service
 
+import com.example.flowterserver.repository.UserRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -16,7 +17,9 @@ class AvatarStorageService(
     private val supabaseUrl: String,
 
     @Value("\${supabase.key}")
-    private val supabaseKey: String
+    private val supabaseKey: String,
+
+    private val userRepository: UserRepository
 
 ) {
 
@@ -58,6 +61,18 @@ class AvatarStorageService(
             String::class.java
         )
 
-        return "$supabaseUrl/storage/v1/object/public/avatars/$fileName"
+        val avatarUrl =
+            "$supabaseUrl/storage/v1/object/public/avatars/$fileName"
+
+        val user = userRepository.findById(userId)
+            .orElseThrow {
+                IllegalArgumentException("User not found")
+            }
+
+        user.avatarUrl = avatarUrl
+
+        userRepository.save(user)
+
+        return avatarUrl
     }
 }

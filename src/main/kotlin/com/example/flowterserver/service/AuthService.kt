@@ -17,7 +17,8 @@ class AuthService(
         username: String,
         email: String,
         password: String,
-        birthDate: String
+        birthDate: String,
+        name: String
     ): User {
 
         if (userRepository.findByUsername(username) != null) {
@@ -32,13 +33,17 @@ class AuthService(
             username = username,
             email = email,
             password = requireNotNull(passwordEncoder.encode(password)),
-            birthDate = LocalDate.parse(birthDate)
+            birthDate = LocalDate.parse(birthDate),
+            name = name
         )
 
         return userRepository.save(user)
     }
 
-    fun login(username: String, password: String): User {
+    fun login(
+        username: String,
+        password: String
+    ): User {
 
         val user = userRepository.findByUsername(username)
             ?: throw IllegalArgumentException("Invalid username or password")

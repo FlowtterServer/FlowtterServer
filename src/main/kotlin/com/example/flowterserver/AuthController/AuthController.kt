@@ -11,7 +11,8 @@ data class RegisterRequest(
     val username: String,
     val email: String,
     val password: String,
-    val birthDate: String
+    val birthDate: String,
+    val name: String
 )
 
 data class LoginRequest(
@@ -33,12 +34,14 @@ class AuthController(
             username = request.username,
             email = request.email,
             password = request.password,
-            birthDate = request.birthDate
+            birthDate = request.birthDate,
+            name = request.name
         )
 
         return mapOf(
             "id" to user.id,
             "username" to user.username,
+            "name" to user.name,
             "email" to user.email
         )
     }
@@ -56,7 +59,9 @@ class AuthController(
         return mapOf(
             "id" to user.id,
             "username" to user.username,
+            "name" to user.name,
             "email" to user.email,
+            "avatarUrl" to user.avatarUrl,
             "token" to token
         )
     }
