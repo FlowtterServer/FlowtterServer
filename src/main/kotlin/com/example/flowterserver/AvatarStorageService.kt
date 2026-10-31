@@ -1,3 +1,4 @@
+
 package com.example.flowterserver.service
 
 import com.example.flowterserver.repository.UserRepository
@@ -30,30 +31,47 @@ class AvatarStorageService(
         file: MultipartFile
     ): String {
 
-        val fileName = "$userId-${System.currentTimeMillis()}.jpg"
+        require(!file.isEmpty) {
+            "Le fichier est vide"
+        }
+
+        // Vérifier que l'utilisateur existe
+        val user = userRepository.findById(userId)
+            .orElseThrow {
+                IllegalArgumentException("Utilisateur introuvable : $userId")
+            }
+
+        // Préparer le nom du fichier
+        val extension = when (file.contentType) {
+            "image/png" -> "png"
+            "image/webp" -> "webp"
+            "image/gif" -> "gif"
+            else -> "jpg"
+        }
+
+        val fileName = "$userId-${System.currentTimeMillis()}.$extension"
+
+        // URL d'envoi vers Supabase Storage
+        val cleanSupabaseUrl = supabaseUrl.trimEnd('/')
 
         val uploadUrl =
-            "$supabaseUrl/storage/v1/object/avatars/$fileName"
+            "$cleanSupabaseUrl/storage/v1/object/avatars/$fileName"
 
-        val headers = HttpHeaders()
+        // Préparer les en-têtes HTTP
+        val headers = HttpHeaders().apply {
+            setBearerAuth(supabaseKey)
+            set("apikey", supabaseKey)
+            contentType = MediaType.APPLICATION_OCTET_STREAM
+            set("x-upsert", "true")
+        }
 
-        headers.set(
-            "Authorization",
-            "Bearer $supabaseKey"
-        )
-
-        headers.set(
-            "apikey",
-            supabaseKey
-        )
-
-        headers.contentType = MediaType.APPLICATION_OCTET_STREAM
-
+        // Préparer le fichier
         val entity = HttpEntity(
             file.bytes,
             headers
         )
 
+        // Envoyer le fichier vers Supabase
         restTemplate.exchange(
             uploadUrl,
             HttpMethod.POST,
@@ -61,17 +79,28 @@ class AvatarStorageService(
             String::class.java
         )
 
+        // Construire l'URL publique
         val avatarUrl =
-            "$supabaseUrl/storage/v1/object/public/avatars/$fileName"
+            "$cleanSupabaseUrl/storage/v1/object/public/avatars/$fileName"
 
-        val user = userRepository.findById(userId)
-            .orElseThrow {
-                IllegalArgumentException("User not found")
-            }
+        require(avatarUrl.startsWith("https://")) {
+            "L'URL de l'avatar n'est pas sécurisée"
+        }
 
+        // Enregistrer l'URL dans la base de données
         user.avatarUrl = avatarUrl
 
         userRepository.save(user)
+
+        // Vérifier la sauvegarde
+        val savedUser = userRepository.findById(userId)
+            .orElseThrow {
+                IllegalStateException("Utilisateur introuvable après sauvegarde")
+            }
+
+        check(savedUser.avatarUrl == avatarUrl) {
+            "L'URL de l'avatar n'a pas été correctement enregistrée"
+        }
 
         return avatarUrl
     }
