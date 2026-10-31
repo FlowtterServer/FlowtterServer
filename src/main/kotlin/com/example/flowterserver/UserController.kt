@@ -1,4 +1,3 @@
-
 package com.example.flowterserver
 
 import com.example.flowterserver.repository.UserRepository
@@ -15,6 +14,7 @@ class UserController(
 
     @GetMapping("/{id}")
     fun getUser(@PathVariable id: Long): Map<String, Any?> {
+
         val user = userRepository.findById(id)
             .orElseThrow {
                 NoSuchElementException("Utilisateur introuvable")
